@@ -1,0 +1,9 @@
+QListWidget::item {
+    padding: 7px;
+    background: #fff;
+}
+
+QListWidget::item:selected {
+    background: #2980b9;
+    color: white;
+}

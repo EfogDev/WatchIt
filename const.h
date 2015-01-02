@@ -12,4 +12,7 @@
 #define APPDIR LINUXDIR
 #endif
 
+#define BUTTON_HEIGHT     35
+#define LISTWIDGET_HEIGHT 240
+
 #endif // CONST

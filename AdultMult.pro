@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui webkit webkitwidgets
+QT       += core gui network webkit webkitwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,3 +25,5 @@ DISTFILES += \
 
 RESOURCES += \
     styles.qrc
+
+CONFIG += C++11

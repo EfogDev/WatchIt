@@ -3,6 +3,7 @@
 #include <QtCore>
 #include <QtWidgets>
 #include <QVector>
+#include <QObject>
 
 class Episode {
     public:
@@ -15,6 +16,10 @@ class Season {
     public:
         QVector<Episode> episodeList;
         QString url;
+        QString prefix;
+        bool isUpdated = false;
+        void updateEpisodes();
+        void waitForUpdated();
 };
 
 class Serial {
@@ -22,6 +27,10 @@ class Serial {
         QVector<Season> seasonList;
         QString name;
         QString url;
+        bool isSingle = false;
+        bool isUpdated = false;
+        void updateSeasons();
+        void waitForUpdated();
 };
 
 class SerialList {
@@ -29,7 +38,7 @@ class SerialList {
         QVector<Serial> vector;
         void save(QString filename);
         void load(QString filename);
-        int add(QString url, QListWidget *list);
+        int add(QString url);
 
         enum Error {
             NoSuchSerial,

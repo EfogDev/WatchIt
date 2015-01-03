@@ -1,4 +1,7 @@
 #include "mainwindow.h"
+#include "const.h"
+#include <QtWebKit>
+#include <QtWebKitWidgets>
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
@@ -18,7 +21,7 @@ void MainWindow::lwMainClicked(QListWidgetItem *wdg) {
     lw_Main->setEnabled(false);
     lw_Seasons->clear();
 
-    Serial *current = &serialList->vector[wdg->listWidget()->row(wdg) + 1];
+    Serial *current = &serialList->vector[wdg->listWidget()->row(wdg)];
 
     selectedSerial = current;
 
@@ -44,6 +47,7 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
     lw_Seasons->setEnabled(false);
     pb_Back->setEnabled(false);
     lw_Episodes->clear();
+    lw_Episodes->scroll(0, 0);
 
     Season *current = &selectedSerial->seasonList[wdg->listWidget()->row(wdg)];
 
@@ -55,13 +59,32 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
     int i = 0;
     for (Episode episode: current->episodeList) {
         i++;
-        lw_Episodes->addItem("Серия " + QString::number(i) + (episode.name.trimmed().isEmpty() ? "" : ": ") + episode.name);
+        QListWidgetItem *item = new QListWidgetItem("Серия " + QString::number(i) + (episode.name.trimmed().isEmpty() ? "" : ": ") + episode.name);
+        if (episode.watched)
+            item->setTextColor(QColor(150, 150, 150));
+        lw_Episodes->addItem(item);
     }
 
     lw_Seasons->setEnabled(true);
     pb_Back->setEnabled(true);
     lw_Seasons->setVisible(false);
     lw_Episodes->setVisible(true);
+}
+
+void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
+    QWebView *browser = (QWebView*) gui["browser"];
+
+    Episode *current = &selectedSeason->episodeList[wdg->listWidget()->row(wdg)];
+    selectedEpisode = current;
+    wdg->setTextColor(QColor(150, 150, 150));
+
+    current->updateSources();
+    current->waitForUpdated();
+
+    browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('video').src = '" + current->url720 + "';");
+
+    //current->watched = true;
+    serialList->save(APPDIR + "/serials.dat");
 }
 
 void MainWindow::pbBackClicked() {

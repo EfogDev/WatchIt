@@ -4,11 +4,13 @@
 #include <QApplication>
 #include <QtWidgets>
 #include <QtCore>
-#include <QtWebKitWidgets/QWebView>
+#include <QWebView>
 #include <fstream>
 #include <iostream>
+#include <QNetworkDiskCache>
 
 QString listWidgetStyle;
+QString browserHtml;
 SerialList serialList;
 
 void init() {
@@ -23,6 +25,11 @@ void init() {
     listWidgetStyleFile.open(QIODevice::ReadOnly);
     listWidgetStyle = listWidgetStyleFile.readAll();
     listWidgetStyleFile.close();
+
+    QFile html(":/web/html");
+    html.open(QIODevice::ReadOnly);
+    browserHtml = html.readAll();
+    html.close();
 
     serialList.load(APPDIR + "/serials.dat");
 }
@@ -44,6 +51,8 @@ int main(int argc, char *argv[]) {
     lw_Episodes->setStyleSheet(listWidgetStyle);
     lw_Episodes->setVisible(false);
     lw_Episodes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QObject::connect(lw_Episodes, SIGNAL(itemClicked(QListWidgetItem*)), &w, SLOT(lwEpisodesClicked(QListWidgetItem*)));
 
     QListWidget *lw_Seasons = new QListWidget();
     lw_Seasons->setFixedWidth(LISTWIDGET_HEIGHT);
@@ -81,6 +90,19 @@ int main(int argc, char *argv[]) {
     QObject::connect(pb_Back, SIGNAL(clicked()), &w, SLOT(pbBackClicked()));
 
     QWebView *browser = new QWebView();
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
+    browser->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
+    browser->setHtml(browserHtml);
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager();
+    QNetworkDiskCache* diskCache = new QNetworkDiskCache();
+    QString location = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    diskCache->setCacheDirectory(location);
+    manager->setCache(diskCache);
+    browser->page()->setNetworkAccessManager(manager);
 
     w.gui["layout"] = layout;
     w.gui["leftPanel"] = leftPanel;
@@ -104,16 +126,12 @@ int main(int argc, char *argv[]) {
     layout->addWidget(browser);
     w.setCentralWidget(cWidget);
     w.setMinimumSize(500, 120);
+    w.setFixedSize(900, 376);
     w.show();
 
-    serialList.add("http://adultmult.tv/html/simpsons_start.html");
-    lw_Main->addItem("Симпсоны");
-
-    serialList.add("http://adultmult.tv/other/gravity_falls.html");
-    lw_Main->addItem("Gravity Falls");
-
-    serialList.add("http://adultmult.tv/as/good_vibes.html");
-    lw_Main->addItem("На одной волне");
+    for (Serial serial: serialList.vector) {
+        lw_Main->addItem(serial.name);
+    }
 
     return a.exec();
 }

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/web">
+        <file alias="html">browser.html</file>
+    </qresource>
+</RCC>

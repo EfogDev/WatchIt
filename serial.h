@@ -10,6 +10,9 @@ class Episode {
         QString name;
         QString url240, url360, url480, url720, link;
         bool watched;
+        bool isUpdated = false;
+        void updateSources();
+        void waitForUpdated();
 };
 
 class Season {

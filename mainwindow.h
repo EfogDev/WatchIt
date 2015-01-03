@@ -14,11 +14,13 @@ class MainWindow: public QMainWindow {
         SerialList *serialList;
         Serial *selectedSerial;
         Season *selectedSeason;
+        Episode *selectedEpisode;
         ~MainWindow();
 
     public slots:
         void lwMainClicked(QListWidgetItem *wdg);
         void lwSeasonsClicked(QListWidgetItem *wdg);
+        void lwEpisodesClicked(QListWidgetItem *wdg);
         void pbBackClicked();
         void pbNewClicked();
         void pbRemoveClicked();

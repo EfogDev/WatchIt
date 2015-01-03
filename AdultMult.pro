@@ -21,9 +21,11 @@ HEADERS  += mainwindow.h \
     serial.h
 
 DISTFILES += \
-    ListWidget.css
+    ListWidget.css \
+    browser.html
 
 RESOURCES += \
-    styles.qrc
+    styles.qrc \
+    web.qrc
 
 CONFIG += C++11

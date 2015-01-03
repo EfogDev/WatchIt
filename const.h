@@ -1,3 +1,4 @@
+#include <qglobal.h>
 #ifndef CONST
 #define CONST
 

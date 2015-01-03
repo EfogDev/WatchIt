@@ -7,3 +7,7 @@ QListWidget::item:selected {
     background: #2980b9;
     color: white;
 }
+
+QListWidget {
+    outline: none;
+}

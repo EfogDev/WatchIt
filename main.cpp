@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     lw_Main->setFixedWidth(LISTWIDGET_HEIGHT);
     lw_Main->setGeometry(0, 0, LISTWIDGET_HEIGHT, 0);
     lw_Main->setStyleSheet(listWidgetStyle);
-    lw_Episodes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    lw_Main->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QObject::connect(lw_Main, SIGNAL(itemClicked(QListWidgetItem*)), &w, SLOT(lwMainClicked(QListWidgetItem*)));
 

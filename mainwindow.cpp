@@ -73,6 +73,11 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
 
 void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
     QWebView *browser = (QWebView*) gui["browser"];
+    QListWidget *lw_Episodes = (QListWidget*) gui["lw_Episodes"];
+    QPushButton *pb_Back = (QPushButton*) gui["pb_Back"];
+
+    lw_Episodes->setEnabled(false);
+    pb_Back->setEnabled(false);
 
     Episode *current = &selectedSeason->episodeList[wdg->listWidget()->row(wdg)];
     selectedEpisode = current;
@@ -83,8 +88,11 @@ void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
 
     browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('video').src = '" + current->url720 + "';");
 
-    //current->watched = true;
+    current->watched = true;
     serialList->save(APPDIR + "/serials.dat");
+
+    lw_Episodes->setEnabled(true);
+    pb_Back->setEnabled(true);
 }
 
 void MainWindow::pbBackClicked() {
@@ -109,9 +117,50 @@ void MainWindow::pbBackClicked() {
 }
 
 void MainWindow::pbNewClicked() {
+    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
 
+    lw_Main->setEnabled(false);
+
+    QInputDialog *dialog = new QInputDialog();
+    bool accepted;
+    QString link = dialog->getText(0, "Добавление сериала", "Ссылка на сериал/мульт:", QLineEdit::Normal, "", &accepted);
+    if (accepted && !link.isEmpty()) {
+        if (link.mid(0, 7) != "http://")
+            link = "http://" + link;
+
+        Serial *serial = serialList->add(link);
+        serial->updateSeasons();
+        serial->waitForUpdated();
+
+        serialList->save(APPDIR + "/serials.dat");
+        serialList->toList(lw_Main);
+
+    }
+
+    lw_Main->setEnabled(true);
 }
 
 void MainWindow::pbRemoveClicked() {
+    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
 
+    lw_Main->setEnabled(false);
+
+    QStringList list;
+    int i = 0;
+    for (Serial serial: serialList->vector) {
+        i++;
+        list.append(QString::number(i) + ". " + serial.name);
+    }
+
+    bool accepted;
+    QInputDialog *dialog = new QInputDialog();
+    QString item = dialog->getItem(0, "Удалить сериал", "Выберите сериал для удаления:", list, 0, false, &accepted);
+    if (accepted && !item.isEmpty()) {
+        int index = item.split(".")[0].toInt() - 1; //да-да, ужасный костыль, но перед тем, как написать ЭТО, я 2 часа пытался сделать нормально, так что никаких претензий
+        delete lw_Main->takeItem(index);
+        serialList->vector.remove(index);
+        serialList->save(APPDIR + "/serirals.dat");
+    }
+
+    lw_Main->setEnabled(true);
 }

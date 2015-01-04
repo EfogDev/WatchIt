@@ -22,12 +22,18 @@ void SerialList::load(QString filename) {
     f.close();
 }
 
-int SerialList::add(QString url) {
+void SerialList::toList(QListWidget *list) {
+    list->clear();
+    for (Serial serial: this->vector) {
+        list->addItem(serial.name);
+    }
+}
+
+Serial* SerialList::add(QString url) {
     Serial serial;
     serial.url = url;
     this->vector.push_back(serial);
-    //serial.update();
-    return 0;
+    return &vector[vector.size() - 1];
 }
 
 //Serial
@@ -91,6 +97,7 @@ void Serial::updateSeasons() {
             this->seasonList = serial.seasonList;
         } else {
             QMessageBox::information(0, "Ошибка", "Проблема с интернетом. Повторите позже.", QMessageBox::Ok);
+            isUpdated = true;
             return;
         }
         isUpdated = true;

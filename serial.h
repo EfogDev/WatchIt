@@ -41,7 +41,8 @@ class SerialList {
         QVector<Serial> vector;
         void save(QString filename);
         void load(QString filename);
-        int add(QString url);
+        void toList(QListWidget *list);
+        Serial* add(QString url);
 
         enum Error {
             NoSuchSerial,

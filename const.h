@@ -2,7 +2,7 @@
 #ifndef CONST
 #define CONST
 
-#define WINDIR   QString("%appdata%/adultmult/")
+#define WINDIR   QString("history")
 #define LINUXDIR QString(QDir::homePath() + "/.adultmult/")
 
 #ifdef Q_OS_WIN32

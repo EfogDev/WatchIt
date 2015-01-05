@@ -8,7 +8,7 @@ void SerialList::save(QString filename) {
     QFile f(filename);
     f.open(QIODevice::WriteOnly);
     QDataStream out(&f);
-    out.setVersion(QDataStream::Qt_5_3);
+    out.setVersion(QDataStream::Qt_5_2);
     out << this->vector;
     f.close();
 }
@@ -17,7 +17,7 @@ void SerialList::load(QString filename) {
     QFile f(filename);
     f.open(QIODevice::ReadOnly);
     QDataStream in(&f);
-    in.setVersion(QDataStream::Qt_5_3);
+    in.setVersion(QDataStream::Qt_5_2);
     in >> this->vector;
     f.close();
 }
@@ -32,6 +32,7 @@ void SerialList::toList(QListWidget *list) {
 Serial* SerialList::add(QString url) {
     Serial serial;
     serial.url = url;
+    serial.indexInList = vector.size();
     this->vector.push_back(serial);
     return &vector[vector.size() - 1];
 }
@@ -61,6 +62,7 @@ void Serial::updateSeasons() {
             QString data = codec->toUnicode(reply->readAll());
             if (data.indexOf("Ошибка 404") != -1) {
                 QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
+                isUpdated = true;
                 return;
             }
             Serial serial;
@@ -70,6 +72,7 @@ void Serial::updateSeasons() {
             name.setMinimal(true);
             if (name.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
+                isUpdated = true;
                 return;
             }
             serial.name = name.cap(0).split("<br>")[1].trimmed();
@@ -78,6 +81,7 @@ void Serial::updateSeasons() {
             seasons.setMinimal(true);
             if (seasons.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона", QMessageBox::Ok);
+                isUpdated = true;
                 return;
             }
             int pos = 0;

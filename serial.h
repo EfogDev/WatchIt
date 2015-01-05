@@ -32,6 +32,7 @@ class Serial {
         QString url;
         bool isSingle = false;
         bool isUpdated = false;
+        int indexInList = 0;
         void updateSeasons();
         void waitForUpdated();
 };

@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network webkit webkitwidgets
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets network webkit webkitwidgets
 
 TARGET = AdultMult
 TEMPLATE = app

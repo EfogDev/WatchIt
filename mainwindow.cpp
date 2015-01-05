@@ -132,9 +132,13 @@ void MainWindow::pbNewClicked() {
         serial->updateSeasons();
         serial->waitForUpdated();
 
-        serialList->save(APPDIR + "/serials.dat");
-        serialList->toList(lw_Main);
-
+        if (serial->name.isEmpty()) {
+            //qDebug() << "Empty!" << serial->indexInList;
+            serialList->vector.remove(serial->indexInList);
+        } else {
+            serialList->save(APPDIR + "/serials.dat");
+            serialList->toList(lw_Main);
+        }
     }
 
     lw_Main->setEnabled(true);
@@ -142,6 +146,8 @@ void MainWindow::pbNewClicked() {
 
 void MainWindow::pbRemoveClicked() {
     QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
+
+    if (serialList->vector.size() == 0) return;
 
     lw_Main->setEnabled(false);
 
@@ -156,10 +162,10 @@ void MainWindow::pbRemoveClicked() {
     QInputDialog *dialog = new QInputDialog();
     QString item = dialog->getItem(0, "Удалить сериал", "Выберите сериал для удаления:", list, 0, false, &accepted);
     if (accepted && !item.isEmpty()) {
-        int index = item.split(".")[0].toInt() - 1; //да-да, ужасный костыль, но перед тем, как написать ЭТО, я 2 часа пытался сделать нормально, так что никаких претензий
+        int index = item.split(".")[0].toInt() - 1; //да-да, ужасный костыль, но перед тем, как написать ЭТО, я 2 часа пытался сделать нормально, так что никаких претензий        
         delete lw_Main->takeItem(index);
         serialList->vector.remove(index);
-        serialList->save(APPDIR + "/serirals.dat");
+        serialList->save(APPDIR + "/serials.dat");
     }
 
     lw_Main->setEnabled(true);

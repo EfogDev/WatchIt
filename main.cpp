@@ -14,6 +14,11 @@ QString browserHtml;
 SerialList serialList;
 
 void init() {
+    QStringList paths = QCoreApplication::libraryPaths();
+    paths.append(".");
+    paths.append("platforms");
+    QCoreApplication::setLibraryPaths(paths);
+
     QDir appDir(APPDIR);
     if (!appDir.exists()) appDir.mkdir(APPDIR);
 

@@ -32,3 +32,5 @@ CONFIG += C++11
 
 FORMS += \
     helpwindow.ui
+
+RC_FILE = icon.rc

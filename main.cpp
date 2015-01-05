@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     w.setMinimumSize(500, 120);
     w.setFixedSize(900, 376);
     w.setWindowTitle("AdultMult");
-    w.setWindowIcon(QIcon("main.ico"));
+    //w.setWindowIcon(QIcon("main.ico"));
     w.show();
 
     for (Serial serial: serialList.vector) {

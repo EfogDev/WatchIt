@@ -17,7 +17,7 @@ void init() {
     QDir appDir(APPDIR);
     if (!appDir.exists()) appDir.mkdir(APPDIR);
 
-    QFile serials(APPDIR + "/serials.dat");
+    QFile serials(APPDIR + "serials.dat");
     serials.open(QIODevice::ReadWrite);
     serials.close();
 
@@ -31,7 +31,7 @@ void init() {
     browserHtml = html.readAll();
     html.close();
 
-    serialList.load(APPDIR + "/serials.dat");
+    serialList.load(APPDIR + "serials.dat");
 }
 
 int main(int argc, char *argv[]) {

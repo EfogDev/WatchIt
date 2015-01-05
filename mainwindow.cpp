@@ -90,7 +90,7 @@ void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
     browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('video').src = '" + current->url720 + "';");
 
     current->watched = true;
-    serialList->save(APPDIR + "/serials.dat");
+    serialList->save(APPDIR + "serials.dat");
 
     lw_Episodes->setEnabled(true);
     pb_Back->setEnabled(true);
@@ -137,7 +137,7 @@ void MainWindow::pbNewClicked() {
             //qDebug() << "Empty!" << serial->indexInList;
             serialList->vector.remove(serial->indexInList);
         } else {
-            serialList->save(APPDIR + "/serials.dat");
+            serialList->save(APPDIR + "serials.dat");
             serialList->toList(lw_Main);
         }
     }
@@ -166,7 +166,7 @@ void MainWindow::pbRemoveClicked() {
         int index = item.split(".")[0].toInt() - 1; //да-да, ужасный костыль, но перед тем, как написать ЭТО, я 2 часа пытался сделать нормально, так что никаких претензий        
         delete lw_Main->takeItem(index);
         serialList->vector.remove(index);
-        serialList->save(APPDIR + "/serials.dat");
+        serialList->save(APPDIR + "serials.dat");
     }
 
     lw_Main->setEnabled(true);

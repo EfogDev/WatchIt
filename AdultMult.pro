@@ -12,11 +12,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    serial.cpp
+    serial.cpp \
+    helpwindow.cpp
 
 HEADERS  += mainwindow.h \
     const.h \
-    serial.h
+    serial.h \
+    helpwindow.h
 
 DISTFILES += \
     ListWidget.css \
@@ -27,3 +29,6 @@ RESOURCES += \
     web.qrc
 
 CONFIG += C++11
+
+FORMS += \
+    helpwindow.ui

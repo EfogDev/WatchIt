@@ -89,6 +89,12 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(pb_Back, SIGNAL(clicked()), &w, SLOT(pbBackClicked()));
 
+    QPushButton *pb_About = new QPushButton();
+    pb_About->setText("О программе");
+    pb_About->setFixedHeight(BUTTON_HEIGHT);
+
+    QObject::connect(pb_About, SIGNAL(clicked()), &w, SLOT(pbAboutClicked()));
+
     QWebView *browser = new QWebView();
     QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
@@ -113,6 +119,7 @@ int main(int argc, char *argv[]) {
     w.gui["pb_New"] = pb_New;
     w.gui["pb_Remove"] = pb_Remove;
     w.gui["pb_Back"] = pb_Back;
+    w.gui["pb_About"] = pb_About;
     w.gui["browser"] = browser;
 
     leftPanel->addWidget(lw_Main);
@@ -122,11 +129,13 @@ int main(int argc, char *argv[]) {
     buttonsPanel->addWidget(pb_Remove);
     buttonsPanel->addWidget(pb_Back);
     leftPanel->addLayout(buttonsPanel);
+    leftPanel->addWidget(pb_About);
     layout->addLayout(leftPanel);
     layout->addWidget(browser);
     w.setCentralWidget(cWidget);
     w.setMinimumSize(500, 120);
     w.setFixedSize(900, 376);
+    w.setWindowTitle("AdultMult");
     w.show();
 
     for (Serial serial: serialList.vector) {

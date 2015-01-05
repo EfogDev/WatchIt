@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include <QtWebKit>
 #include <QtWebKitWidgets>
+#include <helpwindow.h>
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
 
@@ -169,4 +170,9 @@ void MainWindow::pbRemoveClicked() {
     }
 
     lw_Main->setEnabled(true);
+}
+
+void MainWindow::pbAboutClicked() {
+    HelpWindow *h = new HelpWindow();
+    h->show();
 }

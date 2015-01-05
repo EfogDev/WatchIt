@@ -24,6 +24,7 @@ class MainWindow: public QMainWindow {
         void pbBackClicked();
         void pbNewClicked();
         void pbRemoveClicked();
+        void pbAboutClicked();
 };
 
 #endif // MAINWINDOW_H

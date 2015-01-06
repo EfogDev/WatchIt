@@ -4,8 +4,127 @@
 #include <QtWebKitWidgets>
 #include <helpwindow.h>
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent) {
+MainWindow::MainWindow(SerialList &_serialList, QWidget *parent) : QMainWindow(parent),
+serialList(_serialList), m_helpWindow(0)
+{
+    QFile listWidgetStyleFile(":/style/ListWidget");
+    listWidgetStyleFile.open(QIODevice::ReadOnly);
+    QString listWidgetStyle = listWidgetStyleFile.readAll();
+    listWidgetStyleFile.close();
 
+    QFile html(":/web/html");
+    html.open(QIODevice::ReadOnly);
+    QString browserHtml = html.readAll();
+    html.close();
+
+    layout = new QHBoxLayout();
+    cWidget = new QWidget();
+    cWidget->setLayout(layout);
+    leftPanel = new QVBoxLayout();
+    buttonsPanel = new QHBoxLayout();
+
+    lw_Episodes = new QListWidget();
+    lw_Episodes->setFixedWidth(LISTWIDGET_HEIGHT);
+    lw_Episodes->setGeometry(0, 0, LISTWIDGET_HEIGHT, 0);
+    lw_Episodes->setStyleSheet(listWidgetStyle);
+    lw_Episodes->setVisible(false);
+    lw_Episodes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    connect(lw_Episodes, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(lwEpisodesClicked(QListWidgetItem*)));
+
+    lw_Seasons = new QListWidget();
+    lw_Seasons->setFixedWidth(LISTWIDGET_HEIGHT);
+    lw_Seasons->setGeometry(0, 0, LISTWIDGET_HEIGHT, 0);
+    lw_Seasons->setStyleSheet(listWidgetStyle);
+    lw_Seasons->setVisible(false);
+
+    connect(lw_Seasons, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(lwSeasonsClicked(QListWidgetItem*)));
+
+    lw_Main = new QListWidget();
+    lw_Main->setFixedWidth(LISTWIDGET_HEIGHT);
+    lw_Main->setGeometry(0, 0, LISTWIDGET_HEIGHT, 0);
+    lw_Main->setStyleSheet(listWidgetStyle);
+    lw_Main->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    lw_Main->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(lw_Main, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(lwMainClicked(QListWidgetItem*)));
+    connect(lw_Main, SIGNAL(customContextMenuRequested(QPoint)), SLOT(lwOnMenu(QPoint)));
+
+    pb_New = new QPushButton();
+    pb_New->setText("Добавить");
+    pb_New->setFixedHeight(BUTTON_HEIGHT);
+
+    connect(pb_New, SIGNAL(clicked()), SLOT(pbNewClicked()));
+
+    pb_Remove = new QPushButton();
+    pb_Remove->setText("Удалить");
+    pb_Remove->setFixedHeight(BUTTON_HEIGHT);
+
+    connect(pb_Remove, SIGNAL(clicked()), SLOT(pbRemoveClicked()));
+
+    pb_Back = new QPushButton();
+    pb_Back->setText("Вернуться");
+    pb_Back->setFixedHeight(BUTTON_HEIGHT);
+    pb_Back->setVisible(false);
+
+    connect(pb_Back, SIGNAL(clicked()), SLOT(pbBackClicked()));
+
+    pb_About = new QPushButton();
+    pb_About->setText("О программе");
+    pb_About->setFixedHeight(BUTTON_HEIGHT);
+
+    connect(pb_About, SIGNAL(clicked()), SLOT(pbAboutClicked()));
+
+    browser = new QWebView();
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
+    browser->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
+    browser->setHtml(browserHtml);
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager();
+    QNetworkDiskCache* diskCache = new QNetworkDiskCache();
+    QString location = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    diskCache->setCacheDirectory(location);
+    manager->setCache(diskCache);
+    browser->page()->setNetworkAccessManager(manager);
+
+    leftPanel->addWidget(lw_Main);
+    leftPanel->addWidget(lw_Seasons);
+    leftPanel->addWidget(lw_Episodes);
+    buttonsPanel->addWidget(pb_New);
+    buttonsPanel->addWidget(pb_Remove);
+    buttonsPanel->addWidget(pb_Back);
+    leftPanel->addLayout(buttonsPanel);
+    leftPanel->addWidget(pb_About);
+    layout->addLayout(leftPanel);
+    layout->addWidget(browser);
+
+    setCentralWidget(cWidget);
+    setMinimumSize(500, 120);
+    setFixedSize(900, 376);
+    setWindowTitle("AdultMult");
+    //w.setWindowIcon(QIcon("main.ico"));
+
+    for (Serial &serial: serialList.vector)
+    {
+        lw_Main->addItem(serial.name);
+    }
+    lw_Main->setCurrentRow(0);
+
+    QAction *actionNew = new QAction("Добавить", this);
+    connect(actionNew, SIGNAL(triggered()), SLOT(pbNewClicked()));
+
+    QAction *actionDel = new QAction("Удалить", this);
+    connect(actionNew, SIGNAL(triggered()), SLOT(onActionDelete()));
+
+    m_menuAddDelete = new QMenu(this);
+    m_menuAddDelete->addAction(actionNew);
+    m_menuAddDelete->addAction(actionDel);
+
+    m_menuAdd = new QMenu(this);
+    m_menuAdd->addAction(actionNew);
 }
 
 MainWindow::~MainWindow() {
@@ -13,16 +132,10 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::lwMainClicked(QListWidgetItem *wdg) {
-    QListWidget *lw_Seasons = (QListWidget*) gui["lw_Seasons"];
-    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
-    QPushButton *pb_New = (QPushButton*) gui["pb_New"];
-    QPushButton *pb_Remove = (QPushButton*) gui["pb_Remove"];
-    QPushButton *pb_Back = (QPushButton*) gui["pb_Back"];
-
     lw_Main->setEnabled(false);
     lw_Seasons->clear();
 
-    Serial *current = &serialList->vector[wdg->listWidget()->row(wdg)];
+    Serial *current = &serialList.vector[wdg->listWidget()->row(wdg)];
 
     selectedSerial = current;
 
@@ -41,10 +154,6 @@ void MainWindow::lwMainClicked(QListWidgetItem *wdg) {
 }
 
 void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
-    QListWidget *lw_Episodes = (QListWidget*) gui["lw_Episodes"];
-    QListWidget *lw_Seasons = (QListWidget*) gui["lw_Seasons"];
-    QPushButton *pb_Back = (QPushButton*) gui["pb_Back"];
-
     lw_Seasons->setEnabled(false);
     pb_Back->setEnabled(false);
     lw_Episodes->clear();
@@ -73,10 +182,6 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
 }
 
 void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
-    QWebView *browser = (QWebView*) gui["browser"];
-    QListWidget *lw_Episodes = (QListWidget*) gui["lw_Episodes"];
-    QPushButton *pb_Back = (QPushButton*) gui["pb_Back"];
-
     lw_Episodes->setEnabled(false);
     pb_Back->setEnabled(false);
 
@@ -90,20 +195,45 @@ void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
     browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('video').src = '" + current->url720 + "';");
 
     current->watched = true;
-    serialList->save(APPDIR + "serials.dat");
+    serialList.save(APPDIR + "serials.dat");
 
     lw_Episodes->setEnabled(true);
     pb_Back->setEnabled(true);
 }
 
-void MainWindow::pbBackClicked() {
-    QListWidget *lw_Episodes = (QListWidget*) gui["lw_Episodes"];
-    QListWidget *lw_Seasons = (QListWidget*) gui["lw_Seasons"];
-    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
-    QPushButton *pb_New = (QPushButton*) gui["pb_New"];
-    QPushButton *pb_Remove = (QPushButton*) gui["pb_Remove"];
-    QPushButton *pb_Back = (QPushButton*) gui["pb_Back"];
+void MainWindow::lwOnMenu(const QPoint &point)
+{
+    if(lw_Main->itemAt(point))
+        m_menuAddDelete->exec(lw_Main->mapToGlobal(point));
+    else
+        m_menuAdd->exec(lw_Main->mapToGlobal(point));
+}
 
+void MainWindow::onActionDelete()
+{
+    const QString title("Удалить сериал");
+
+    lw_Main->setEnabled(false);
+
+    int index = lw_Main->currentRow();
+    if(index >= 0)
+    {
+        Serial &s = serialList.vector[index];
+        QString msg = "Вы точно хотите удалить сериал \'" + s.name + "\'?";
+
+        int ret = QMessageBox::question(this, title, msg, QMessageBox::Yes, QMessageBox::No);
+        if(ret == QMessageBox::Yes)
+        {
+            delete lw_Main->takeItem(index);
+            serialList.vector.remove(index);
+            serialList.save(APPDIR + "serials.dat");
+        }
+    }
+    else
+        QMessageBox::information(this, title, "Выберите сериал");
+}
+
+void MainWindow::pbBackClicked() {
     if (lw_Episodes->isVisible()) {
         lw_Seasons->setVisible(true);
         lw_Episodes->setVisible(false);
@@ -118,8 +248,6 @@ void MainWindow::pbBackClicked() {
 }
 
 void MainWindow::pbNewClicked() {
-    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
-
     lw_Main->setEnabled(false);
 
     QInputDialog *dialog = new QInputDialog();
@@ -129,16 +257,16 @@ void MainWindow::pbNewClicked() {
         if (link.mid(0, 7) != "http://")
             link = "http://" + link;
 
-        Serial *serial = serialList->add(link);
+        Serial *serial = serialList.add(link);
         serial->updateSeasons();
         serial->waitForUpdated();
 
         if (serial->name.isEmpty()) {
             //qDebug() << "Empty!" << serial->indexInList;
-            serialList->vector.remove(serial->indexInList);
+            serialList.vector.remove(serial->indexInList);
         } else {
-            serialList->save(APPDIR + "serials.dat");
-            serialList->toList(lw_Main);
+            serialList.save(APPDIR + "serials.dat");
+            serialList.toList(lw_Main);
         }
     }
 
@@ -146,15 +274,10 @@ void MainWindow::pbNewClicked() {
 }
 
 void MainWindow::pbRemoveClicked() {
-    QListWidget *lw_Main = (QListWidget*) gui["lw_Main"];
-
-    if (serialList->vector.size() == 0) return;
-
-    lw_Main->setEnabled(false);
 
     QStringList list;
     int i = 0;
-    for (Serial serial: serialList->vector) {
+    for (Serial &serial: serialList.vector) {
         i++;
         list.append(QString::number(i) + ". " + serial.name);
     }
@@ -163,16 +286,18 @@ void MainWindow::pbRemoveClicked() {
     QInputDialog *dialog = new QInputDialog();
     QString item = dialog->getItem(0, "Удалить сериал", "Выберите сериал для удаления:", list, 0, false, &accepted);
     if (accepted && !item.isEmpty()) {
-        int index = item.split(".")[0].toInt() - 1; //да-да, ужасный костыль, но перед тем, как написать ЭТО, я 2 часа пытался сделать нормально, так что никаких претензий        
+        int index = list.indexOf(item);
         delete lw_Main->takeItem(index);
-        serialList->vector.remove(index);
-        serialList->save(APPDIR + "serials.dat");
+        serialList.vector.remove(index);
+        serialList.save(APPDIR + "serials.dat");
     }
 
     lw_Main->setEnabled(true);
+
 }
 
 void MainWindow::pbAboutClicked() {
-    HelpWindow *h = new HelpWindow();
-    h->show();
+    if(m_helpWindow == 0)
+        m_helpWindow = new HelpWindow(this);
+    m_helpWindow->show();
 }

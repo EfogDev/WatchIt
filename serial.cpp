@@ -68,16 +68,16 @@ void Serial::updateSeasons() {
             Serial serial;
             serial.url = reply->url().toString();
 
-            QRegExp name("<span class=\"name\">((.|[\r\n])*)</span>");
+            QRegExp name("<span class=\"(name|стиль1)\">((.|[\r\n])*)</span>");
             name.setMinimal(true);
             if (name.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
                 isUpdated = true;
                 return;
             }
-            serial.name = name.cap(0).split("<br>")[1].trimmed();
+            serial.name = (name.cap(0).replace("стиль1", "") == name.cap(0) ? name.cap(0).split("<br>")[1].trimmed() : name.cap(0).split(">")[1].split("<")[0]);
 
-            QRegExp seasons("<a href=\"([a-zA-Z0-9_-]+)_([0-9]+)s.html\">");
+            QRegExp seasons("<a href=\"([a-zA-Z0-9_-./]+)_([0-9]+)s.html\">");
             seasons.setMinimal(true);
             if (seasons.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона", QMessageBox::Ok);
@@ -151,7 +151,7 @@ void Season::updateEpisodes() {
     prefix = url.split('/')[3];
 
     Season season;
-    QRegExp episodes("<a href=\"([a-zA-Z0-9_-.]+)\"><span class=\"(episode|стиль33)\">(.+)</span>");
+    QRegExp episodes("<a href=\"([a-zA-Z0-9_-.]+)\"><span class=\"(episode|стиль33|стиль41 стиль139 стиль138|стиль44 стиль137 стиль138 стиль139)\">(.+)</span>");
     episodes.setMinimal(true);
     int ePos = 0;
     int i = 0;
@@ -251,7 +251,9 @@ void Episode::updateSources() {
     url240 = url240rx.cap(1).replace("\\", "");
     url360 = url360rx.cap(1).replace("\\", "");
     url480 = url480rx.cap(1).replace("\\", "");
-    url720 = frame;//url720rx.cap(1).replace("\\", "");
+    url720 = url720rx.cap(1).replace("\\", "");
+
+    flashPlayer = frame;
 
     isUpdated = true;
 }

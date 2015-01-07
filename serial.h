@@ -8,7 +8,7 @@
 class Episode {
     public:
         QString name;
-        QString url240, url360, url480, url720, link;
+        QString url240, url360, url480, url720, flashPlayer, link;
         bool watched;
         bool isUpdated = false;
         void updateSources();

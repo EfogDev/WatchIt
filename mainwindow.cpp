@@ -4,9 +4,7 @@
 #include <QtWebKitWidgets>
 #include <helpwindow.h>
 
-MainWindow::MainWindow(SerialList &_serialList, QWidget *parent) : QMainWindow(parent),
-serialList(_serialList), m_helpWindow(0)
-{
+MainWindow::MainWindow(SerialList &_serialList, QWidget *parent): QMainWindow(parent), serialList(_serialList), m_helpWindow(0) {
     QFile listWidgetStyleFile(":/style/ListWidget");
     listWidgetStyleFile.open(QIODevice::ReadOnly);
     QString listWidgetStyle = listWidgetStyleFile.readAll();
@@ -17,11 +15,14 @@ serialList(_serialList), m_helpWindow(0)
     QString browserHtml = html.readAll();
     html.close();
 
+    settings.load(APPDIR + "settings.dat");
+
     layout = new QHBoxLayout();
     cWidget = new QWidget();
     cWidget->setLayout(layout);
     leftPanel = new QVBoxLayout();
     buttonsPanel = new QHBoxLayout();
+    bottomPanel = new QHBoxLayout();
 
     lw_Episodes = new QListWidget();
     lw_Episodes->setFixedWidth(LISTWIDGET_HEIGHT);
@@ -29,8 +30,10 @@ serialList(_serialList), m_helpWindow(0)
     lw_Episodes->setStyleSheet(listWidgetStyle);
     lw_Episodes->setVisible(false);
     lw_Episodes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    lw_Episodes->setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(lw_Episodes, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(lwEpisodesClicked(QListWidgetItem*)));
+    connect(lw_Episodes, SIGNAL(customContextMenuRequested(QPoint)), SLOT(lwEpisodesOnMenu(QPoint)));
 
     lw_Seasons = new QListWidget();
     lw_Seasons->setFixedWidth(LISTWIDGET_HEIGHT);
@@ -75,13 +78,25 @@ serialList(_serialList), m_helpWindow(0)
 
     connect(pb_About, SIGNAL(clicked()), SLOT(pbAboutClicked()));
 
+    pb_Download = new QPushButton();
+    pb_Download->setIcon(QIcon(":/style/download"));
+    pb_Download->setFixedSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
+    pb_Download->setVisible(false);
+
+    connect(pb_Download, SIGNAL(clicked()), SLOT(pbDownloadClicked()));
+
+    pb_Settings = new QPushButton();
+    pb_Settings->setText("Настройки");
+    pb_Settings->setFixedHeight(BUTTON_HEIGHT);
+
+    connect(pb_Settings, SIGNAL(clicked()), SLOT(pbSettingsClicked()));
+
     browser = new QWebView();
     QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
     browser->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
-    browser->setHtml(browserHtml);
 
     QNetworkAccessManager* manager = new QNetworkAccessManager();
     QNetworkDiskCache* diskCache = new QNetworkDiskCache();
@@ -90,25 +105,31 @@ serialList(_serialList), m_helpWindow(0)
     manager->setCache(diskCache);
     browser->page()->setNetworkAccessManager(manager);
 
+    connect(browser, SIGNAL(loadFinished(bool)), this, SLOT(browserLoaded()));
+
     leftPanel->addWidget(lw_Main);
     leftPanel->addWidget(lw_Seasons);
     leftPanel->addWidget(lw_Episodes);
     buttonsPanel->addWidget(pb_New);
     buttonsPanel->addWidget(pb_Remove);
     buttonsPanel->addWidget(pb_Back);
+    buttonsPanel->addWidget(pb_Download);
     leftPanel->addLayout(buttonsPanel);
-    leftPanel->addWidget(pb_About);
+    bottomPanel->addWidget(pb_About);
+    bottomPanel->addWidget(pb_Settings);
+    leftPanel->addLayout(bottomPanel);
     layout->addLayout(leftPanel);
     layout->addWidget(browser);
 
     setCentralWidget(cWidget);
     setMinimumSize(500, 120);
-    setFixedSize(900, 376);
+    resize(900, 376);
     setWindowTitle("AdultMult");
-    //w.setWindowIcon(QIcon("main.ico"));
 
-    for (Serial &serial: serialList.vector)
-    {
+    if (settings.onTop)
+        updateSettings();
+
+    for (Serial &serial: serialList.vector) {
         lw_Main->addItem(serial.name);
     }
     lw_Main->setCurrentRow(0);
@@ -117,7 +138,7 @@ serialList(_serialList), m_helpWindow(0)
     connect(actionNew, SIGNAL(triggered()), SLOT(pbNewClicked()));
 
     QAction *actionDel = new QAction("Удалить", this);
-    connect(actionNew, SIGNAL(triggered()), SLOT(onActionDelete()));
+    connect(actionDel, SIGNAL(triggered()), SLOT(onActionDelete()));
 
     m_menuAddDelete = new QMenu(this);
     m_menuAddDelete->addAction(actionNew);
@@ -125,6 +146,14 @@ serialList(_serialList), m_helpWindow(0)
 
     m_menuAdd = new QMenu(this);
     m_menuAdd->addAction(actionNew);
+
+    QAction *actionNowViewed = new QAction("Не просмотрено", this);
+    connect(actionNowViewed, SIGNAL(triggered()), SLOT(episodeNotViewed()));
+
+    m_Episode = new QMenu(this);
+    m_Episode->addAction(actionNowViewed);
+
+    browser->setHtml(browserHtml);
 }
 
 MainWindow::~MainWindow() {
@@ -157,7 +186,7 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
     lw_Seasons->setEnabled(false);
     pb_Back->setEnabled(false);
     lw_Episodes->clear();
-    lw_Episodes->scroll(0, 0);
+    lw_Episodes->verticalScrollBar()->setValue(0);
 
     Season *current = &selectedSerial->seasonList[wdg->listWidget()->row(wdg)];
 
@@ -170,13 +199,18 @@ void MainWindow::lwSeasonsClicked(QListWidgetItem *wdg) {
     for (Episode episode: current->episodeList) {
         i++;
         QListWidgetItem *item = new QListWidgetItem("Серия " + QString::number(i) + (episode.name.trimmed().isEmpty() ? "" : ": ") + episode.name);
-        if (episode.watched)
+        if (episode.watched) {
             item->setTextColor(QColor(150, 150, 150));
+        } else {
+            item->setTextColor(QColor(0, 0, 0));
+        }
+
         lw_Episodes->addItem(item);
     }
 
     lw_Seasons->setEnabled(true);
     pb_Back->setEnabled(true);
+    pb_Download->setVisible(true);
     lw_Seasons->setVisible(false);
     lw_Episodes->setVisible(true);
 }
@@ -192,7 +226,7 @@ void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
     current->updateSources();
     current->waitForUpdated();
 
-    browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('video').src = '" + current->url720 + "';");
+    browser->setUrl(current->flashPlayer);
 
     current->watched = true;
     serialList.save(APPDIR + "serials.dat");
@@ -201,36 +235,51 @@ void MainWindow::lwEpisodesClicked(QListWidgetItem *wdg) {
     pb_Back->setEnabled(true);
 }
 
-void MainWindow::lwOnMenu(const QPoint &point)
-{
-    if(lw_Main->itemAt(point))
+void MainWindow::lwOnMenu(const QPoint &point) {
+    if (lw_Main->itemAt(point))
         m_menuAddDelete->exec(lw_Main->mapToGlobal(point));
     else
         m_menuAdd->exec(lw_Main->mapToGlobal(point));
 }
 
-void MainWindow::onActionDelete()
-{
+void MainWindow::lwEpisodesOnMenu(const QPoint &point) {
+    if (lw_Episodes->itemAt(point))
+        m_Episode->exec(lw_Main->mapToGlobal(point));
+}
+
+void MainWindow::onActionDelete() {
     const QString title("Удалить сериал");
 
     lw_Main->setEnabled(false);
 
     int index = lw_Main->currentRow();
-    if(index >= 0)
-    {
+    if (index >= 0) {
         Serial &s = serialList.vector[index];
         QString msg = "Вы точно хотите удалить сериал \'" + s.name + "\'?";
 
         int ret = QMessageBox::question(this, title, msg, QMessageBox::Yes, QMessageBox::No);
-        if(ret == QMessageBox::Yes)
-        {
+        if (ret == QMessageBox::Yes) {
             delete lw_Main->takeItem(index);
             serialList.vector.remove(index);
             serialList.save(APPDIR + "serials.dat");
         }
+    } else QMessageBox::information(this, title, "Выберите сериал");
+
+    lw_Main->setEnabled(true);
+}
+
+void MainWindow::episodeNotViewed() {
+    lw_Episodes->setEnabled(false);
+
+    int index = lw_Episodes->currentRow();
+    Episode *item = &selectedSeason->episodeList[lw_Episodes->currentRow()];
+    if (index >= 0) {
+        item->watched = false;
+        lw_Episodes->currentItem()->setTextColor(QColor(0, 0, 0));
+        serialList.save(APPDIR + "serials.dat");
     }
-    else
-        QMessageBox::information(this, title, "Выберите сериал");
+
+    lw_Episodes->setEnabled(true);
 }
 
 void MainWindow::pbBackClicked() {
@@ -245,6 +294,8 @@ void MainWindow::pbBackClicked() {
         lw_Seasons->setVisible(false);
         lw_Episodes->setVisible(false);
     }
+
+    pb_Download->setVisible(false);
 }
 
 void MainWindow::pbNewClicked() {
@@ -262,7 +313,6 @@ void MainWindow::pbNewClicked() {
         serial->waitForUpdated();
 
         if (serial->name.isEmpty()) {
-            //qDebug() << "Empty!" << serial->indexInList;
             serialList.vector.remove(serial->indexInList);
         } else {
             serialList.save(APPDIR + "serials.dat");
@@ -274,7 +324,6 @@ void MainWindow::pbNewClicked() {
 }
 
 void MainWindow::pbRemoveClicked() {
-
     QStringList list;
     int i = 0;
     for (Serial &serial: serialList.vector) {
@@ -293,11 +342,85 @@ void MainWindow::pbRemoveClicked() {
     }
 
     lw_Main->setEnabled(true);
-
 }
 
 void MainWindow::pbAboutClicked() {
-    if(m_helpWindow == 0)
+    if (m_helpWindow == 0)
         m_helpWindow = new HelpWindow(this);
     m_helpWindow->show();
+}
+
+void MainWindow::pbDownloadClicked() {
+    if (!lw_Episodes->currentItem()) {
+        QMessageBox::information(this, "Ошибка", "Вы не выбрали серию для сохранения.", QMessageBox::Ok);
+    } else {
+        switch (settings.quality) {
+            case 0:
+                QDesktopServices::openUrl(QUrl(selectedEpisode->url240));
+                break;
+            case 1:
+                QDesktopServices::openUrl(QUrl(selectedEpisode->url360));
+                break;
+            case 2:
+                QDesktopServices::openUrl(QUrl(selectedEpisode->url480));
+                break;
+            case 3:
+                QDesktopServices::openUrl(QUrl(selectedEpisode->url720));
+                break;
+        }
+
+    }
+}
+
+void MainWindow::pbSettingsClicked() {
+    SettingsWindow *w = new SettingsWindow(this, this);
+    //w->setWindowFlags(Qt::WindowStaysOnTopHint);
+    w->show();
+
+    QObject::connect(w, SIGNAL(finished(int)), this, SLOT(updateSettings()));
+}
+
+//Settings
+
+QDataStream& operator<<(QDataStream &out, const Settings *settings) {
+    out << settings->onTop << settings->quality;
+    return out;
+}
+
+QDataStream& operator>>(QDataStream &in, Settings *settings) {
+    in >> settings->onTop >> settings->quality;
+    return in;
+}
+
+void Settings::save(QString filename) {
+    QFile f(filename);
+    f.open(QIODevice::WriteOnly);
+    QDataStream out(&f);
+    out.setVersion(QDataStream::Qt_5_2);
+    out << this;
+    f.close();
+}
+
+void Settings::load(QString filename) {
+    QFile f(filename);
+    f.open(QIODevice::ReadOnly);
+    QDataStream in(&f);
+    in.setVersion(QDataStream::Qt_5_2);
+    in >> this;
+    f.close();
+}
+
+void MainWindow::updateSettings() {
+    Qt::WindowFlags flags = this->windowFlags();
+    if (settings.onTop) {
+        this->setWindowFlags(flags | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+    } else {
+        this->setWindowFlags(flags ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
+    }
+
+    show();
+}
+
+void MainWindow::browserLoaded() {
+    //qDebug() << browser->page()->mainFrame()->evaluateJavaScript("playerCallback");
 }

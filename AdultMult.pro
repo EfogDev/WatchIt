@@ -13,12 +13,14 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     serial.cpp \
-    helpwindow.cpp
+    helpwindow.cpp \
+    settingswindow.cpp
 
 HEADERS  += mainwindow.h \
     const.h \
     serial.h \
-    helpwindow.h
+    helpwindow.h \
+    settingswindow.h
 
 DISTFILES += \
     ListWidget.css \
@@ -31,6 +33,7 @@ RESOURCES += \
 CONFIG += C++11
 
 FORMS += \
-    helpwindow.ui
+    helpwindow.ui \
+    settingswindow.ui
 
 RC_FILE = icon.rc

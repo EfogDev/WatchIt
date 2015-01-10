@@ -77,7 +77,7 @@ void Serial::updateSeasons() {
             }
             serial.name = (name.cap(0).replace("стиль1", "") == name.cap(0) ? name.cap(0).split("<br>")[1].trimmed() : name.cap(0).split(">")[1].split("<")[0]);
 
-            QRegExp seasons("<a href=\"([a-zA-Z0-9_-./]+)_([0-9]+)s.html\">");
+            QRegExp seasons("<a href=\"(.+)\" title=\"Смотреть .+ сезон.*\">");
             seasons.setMinimal(true);
             if (seasons.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона", QMessageBox::Ok);
@@ -88,7 +88,7 @@ void Serial::updateSeasons() {
             int i = 0;
             while ((pos = seasons.indexIn(data, pos)) != -1) {
                 Season season;
-                season.url = "http://adultmult.tv/" + serial.url.split('/')[3] + "/" + seasons.cap(0).split('"')[1];
+                season.url = "http://adultmult.tv/" + serial.url.split('/')[3] + "/" + seasons.capturedTexts()[1].split('"').last();
                 season.prefix = serial.url.split('/')[3];
                 if (seasonList.size() >= i + 1 && seasonList[i].url == season.url)
                     serial.seasonList.append(seasonList[i]);
@@ -144,7 +144,7 @@ void Season::updateEpisodes() {
 
     QString episodeData = codec->toUnicode(seasonReply->readAll());
     if (episodeData.indexOf("Ошибка 404") != -1)  {
-        QMessageBox::information(0, "Ошибка", "Ошибка в одном из сезонов.", QMessageBox::Ok);
+        QMessageBox::information(0, "Ошибка", "Ошибка сезона: 404 (" + url + ").", QMessageBox::Ok);
         return;
     }
 

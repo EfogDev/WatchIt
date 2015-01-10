@@ -4,10 +4,6 @@
 #include <QApplication>
 #include <QtWidgets>
 #include <QtCore>
-#include <QWebView>
-#include <fstream>
-#include <iostream>
-#include <QNetworkDiskCache>
 
 SerialList serialList;
 

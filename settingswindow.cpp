@@ -5,6 +5,8 @@
 SettingsWindow::SettingsWindow(QWidget *parent, MainWindow *w): QDialog(parent), ui(new Ui::Dialog) {
     ui->setupUi(this);
 
+    setWindowTitle("Настройки");
+
     settings = &w->settings;
     win = w;
 

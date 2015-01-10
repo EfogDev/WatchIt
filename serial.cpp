@@ -77,7 +77,7 @@ void Serial::updateSeasons() {
             }
             serial.name = (name.cap(0).replace("стиль1", "") == name.cap(0) ? name.cap(0).split("<br>")[1].trimmed() : name.cap(0).split(">")[1].split("<")[0]);
 
-            QRegExp seasons("<a href=\"(.+)\" title=\"Смотреть .+ сезон.*\">");
+            QRegExp seasons("<a href=\"(.+)\" (title=\"Смотреть .+ сезон.*\"|class=\"стиль98\")>");
             seasons.setMinimal(true);
             if (seasons.indexIn(data) == -1)  {
                 QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона", QMessageBox::Ok);

@@ -7,7 +7,7 @@
 QT       += core gui widgets network webkit webkitwidgets
 
 TARGET = AdultMult
- TEMPLATE = app
+TEMPLATE = app
 
 
 SOURCES += main.cpp\

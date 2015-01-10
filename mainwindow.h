@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <serial.h>
-#include <settingswindow.h>
 #include <QtCore>
 
 class QWebView;

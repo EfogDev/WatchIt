@@ -1,4 +1,5 @@
 #include "const.h"
+#include "prefswindow.h"
 #include "mainwindow.h"
 #include <QtWebKit>
 #include <QtWebKitWidgets>
@@ -374,7 +375,7 @@ void MainWindow::pbDownloadClicked() {
 }
 
 void MainWindow::pbSettingsClicked() {
-    SettingsWindow *w = new SettingsWindow(this, this);
+    PrefsWindow *w = new PrefsWindow(this, this);
     //w->setWindowFlags(Qt::WindowStaysOnTopHint);
     w->show();
 

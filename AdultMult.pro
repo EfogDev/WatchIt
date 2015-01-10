@@ -14,13 +14,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     serial.cpp \
     helpwindow.cpp \
-    settingswindow.cpp
+    prefswindow.cpp
 
 HEADERS  += mainwindow.h \
     const.h \
     serial.h \
     helpwindow.h \
-    settingswindow.h
+    prefswindow.h
 
 DISTFILES += \
     ListWidget.css \
@@ -34,6 +34,6 @@ CONFIG += C++11
 
 FORMS += \
     helpwindow.ui \
-    settingswindow.ui
+    prefswindow.ui
 
 RC_FILE = icon.rc

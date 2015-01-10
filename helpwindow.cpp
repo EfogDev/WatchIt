@@ -3,6 +3,7 @@
 
 HelpWindow::HelpWindow(QWidget *parent): QDialog(parent), ui(new Ui::Dialog) {
     ui->setupUi(this);
+    ui->label->setText("AdultMult 0.24");
 }
 
 HelpWindow::~HelpWindow() {

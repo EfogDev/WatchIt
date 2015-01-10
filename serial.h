@@ -11,6 +11,7 @@ class Episode {
         QString url240, url360, url480, url720, flashPlayer, link;
         bool watched;
         bool isUpdated = false;
+
         void updateSources();
         void waitForUpdated();
 };
@@ -21,6 +22,7 @@ class Season {
         QString url;
         QString prefix;
         bool isUpdated = false;
+
         void updateEpisodes();
         void waitForUpdated();
 };
@@ -33,6 +35,7 @@ class Serial {
         bool isSingle = false;
         bool isUpdated = false;
         int indexInList = 0;
+
         void updateSeasons();
         void waitForUpdated();
 };

@@ -1,6 +1,5 @@
 #ifndef SETTINGSWINDOW_H
 #define SETTINGSWINDOW_H
-
 #include <QDialog>
 #include <mainwindow.h>
 

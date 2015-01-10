@@ -79,7 +79,7 @@ MainWindow::MainWindow(SerialList &_serialList, QWidget *parent): QMainWindow(pa
     connect(pb_About, SIGNAL(clicked()), SLOT(pbAboutClicked()));
 
     pb_Download = new QPushButton();
-    pb_Download->setIcon(QIcon(":/style/download"));
+    pb_Download->setIcon(QIcon(":/style/download_icon"));
     pb_Download->setFixedSize(BUTTON_HEIGHT, BUTTON_HEIGHT);
     pb_Download->setVisible(false);
 
@@ -132,6 +132,7 @@ MainWindow::MainWindow(SerialList &_serialList, QWidget *parent): QMainWindow(pa
     for (Serial &serial: serialList.vector) {
         lw_Main->addItem(serial.name);
     }
+
     lw_Main->setCurrentRow(0);
 
     QAction *actionNew = new QAction("Добавить", this);

@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/style">
         <file alias="ListWidget">ListWidget.css</file>
-        <file alias="download">download.png</file>
+        <file alias="download_icon">download.png</file>
     </qresource>
 </RCC>

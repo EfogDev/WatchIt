@@ -13,6 +13,7 @@ struct Settings {
     int quality = 3;
     bool onTop = false;
 
+
     void save(QString filename);
     void load(QString filename);
 };

@@ -40,6 +40,5 @@ void SettingsWindow::onSaveClicked() {
     settings->onTop = ui->checkBox->isChecked();
     settings->quality = ui->comboBox->currentIndex();
     settings->save(APPDIR + "settings.dat");
-
     close();
 }

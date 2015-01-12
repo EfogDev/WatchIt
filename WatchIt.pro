@@ -20,7 +20,9 @@ HEADERS  += mainwindow.h \
     const.h \
     serial.h \
     helpwindow.h \
-    prefswindow.h
+    prefswindow.h \
+    ui_prefswindow.h \
+    ui_helpwindow.h
 
 DISTFILES += \
     ListWidget.css \

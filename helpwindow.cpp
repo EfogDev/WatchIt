@@ -3,7 +3,7 @@
 
 HelpWindow::HelpWindow(QWidget *parent): QDialog(parent), ui(new Ui::Dialog) {
     ui->setupUi(this);
-    ui->label->setText("AdultMult 0.24");
+    //ui->label->setText("WatchIt 1.02");
 }
 
 HelpWindow::~HelpWindow() {

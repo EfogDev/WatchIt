@@ -125,7 +125,7 @@ MainWindow::MainWindow(SerialList &_serialList, QWidget *parent): QMainWindow(pa
     setCentralWidget(cWidget);
     setMinimumSize(500, 120);
     resize(900, 376);
-    setWindowTitle("AdultMult");
+    setWindowTitle("WatchIt");
 
     if (settings.onTop)
         updateSettings();

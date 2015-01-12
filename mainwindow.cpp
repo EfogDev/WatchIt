@@ -424,5 +424,5 @@ void MainWindow::updateSettings() {
 }
 
 void MainWindow::browserLoaded() {
-    //qDebug() << browser->page()->mainFrame()->evaluateJavaScript("playerCallback");
+    browser->page()->mainFrame()->evaluateJavaScript("document.getElementById('serials_control').outerHTML = ''; showVideo();");
 }

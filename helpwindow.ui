@@ -61,7 +61,7 @@
     </font>
    </property>
    <property name="text">
-    <string>AdultMult 0.24</string>
+    <string>WatchIt 1.02</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -74,7 +74,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Клиент для просмотра мультов и сериалов&lt;br/&gt;с известного сайта AdultMult.tv.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Клиент для просмотра мультов и сериалов&lt;br/&gt;с известных сайтов AdultMult.tv и ZFilm-HD.com.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">

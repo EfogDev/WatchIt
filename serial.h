@@ -32,6 +32,7 @@ class Serial {
         QVector<Season> seasonList;
         QString name;
         QString url;
+        QString iframeUrl;
         bool isSingle = false;
         bool isUpdated = false;
         int indexInList = 0;

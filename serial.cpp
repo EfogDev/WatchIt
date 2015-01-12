@@ -88,7 +88,7 @@ void Serial::updateSeasons() {
 
                 serial.name = name.cap(1).split("&raquo;").last().trimmed().split('<')[0].trimmed();
 
-                QRegExp iframe("<iframe src=\"http://moonwalk.cc/(.+)/iframe");
+                QRegExp iframe("<iframe src=\"http://(moonwalk.cc|serpens.nl)/(.+)/iframe");
                 iframe.setMinimal(true);
                 if (iframe.indexIn(data) == -1)  {
                     QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
@@ -217,7 +217,7 @@ void Season::updateEpisodes() {
     loop.exec();
 
     QString hostname = seasonUrl.host();
-    if (hostname == "moonwalk.cc") {
+    if (hostname == "moonwalk.cc" || hostname == "serpens.nl") {
         QString episodeData = seasonReply->readAll();
         if (episodeData.indexOf("обнаружена ошибка") != -1) {
             QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
@@ -314,7 +314,7 @@ void Episode::updateSources() {
     QUrl url(link);
 
     QString hostname = url.host();
-    if (hostname == "moonwalk.cc") {
+    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" ) {
 
         //flashPlayer = link;
         isUpdated = true;

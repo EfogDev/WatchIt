@@ -73,7 +73,7 @@ void Serial::updateSeasons() {
                 QString data = reply->readAll();
 
                 if (data.indexOf("обнаружена ошибка") != -1) {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
+                    QMessageBox::information(0, "Ошибка", "Сериал не найден (обнаружена ошибка).", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }
@@ -81,17 +81,17 @@ void Serial::updateSeasons() {
                 QRegExp name("<span id=\"dle-speedbar\">(.+)</div>");
                 name.setMinimal(true);
                 if (name.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
+                    QMessageBox::information(0, "Ошибка", "Сериал не найден (проверьте ссылку).", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }
 
                 serial.name = name.cap(1).split("&raquo;").last().trimmed().split('<')[0].trimmed();
 
-                QRegExp iframe("<iframe src=\"http://(moonwalk.cc|serpens.nl)/(.+)/iframe");
+                QRegExp iframe("<iframe src=\"http://(moonwalk.cc|serpens.nl|helpcdn.nl)/(.+)/iframe");
                 iframe.setMinimal(true);
                 if (iframe.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
+                    QMessageBox::information(0, "Ошибка", "Сериал не найден (отсутствует плеер).", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }
@@ -217,7 +217,7 @@ void Season::updateEpisodes() {
     loop.exec();
 
     QString hostname = seasonUrl.host();
-    if (hostname == "moonwalk.cc" || hostname == "serpens.nl") {
+    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" || hostname == "helpcdn.nl") {
         QString episodeData = seasonReply->readAll();
         if (episodeData.indexOf("обнаружена ошибка") != -1) {
             QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
@@ -314,7 +314,7 @@ void Episode::updateSources() {
     QUrl url(link);
 
     QString hostname = url.host();
-    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" ) {
+    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" || hostname == "helpcdn.nl") {
 
         //flashPlayer = link;
         isUpdated = true;

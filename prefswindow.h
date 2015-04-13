@@ -22,9 +22,11 @@ class PrefsWindow: public QDialog {
         Settings *settings;
         MainWindow *win;
 
+    signals:
+        void saved();
+
     private slots:
         void onSaveClicked();
-        void onCancelClicked();
 };
 
 #endif // SETTINGSWINDOW_H

@@ -376,10 +376,9 @@ void MainWindow::pbDownloadClicked() {
 
 void MainWindow::pbSettingsClicked() {
     PrefsWindow *w = new PrefsWindow(this, this);
-    //w->setWindowFlags(Qt::WindowStaysOnTopHint);
     w->show();
 
-    QObject::connect(w, SIGNAL(finished(int)), this, SLOT(updateSettings()));
+    QObject::connect(w, SIGNAL(saved()), this, SLOT(updateSettings()));
 }
 
 //Settings
@@ -413,11 +412,12 @@ void Settings::load(QString filename) {
 }
 
 void MainWindow::updateSettings() {
-    Qt::WindowFlags flags = this->windowFlags();
     if (settings.onTop) {
-        this->setWindowFlags(flags | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+        qDebug() <<  "On top now.";
     } else {
-        this->setWindowFlags(flags ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
+        setWindowFlags(windowFlags() & ~Qt::WindowStaysOnTopHint);
+        qDebug() <<  "Not on top now.";
     }
 
     show();

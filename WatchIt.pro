@@ -6,7 +6,7 @@
 
 QT       += core gui widgets network webkit webkitwidgets
 
-TARGET = AdultMult
+TARGET = WatchIt
 TEMPLATE = app
 
 
@@ -22,7 +22,8 @@ HEADERS  += mainwindow.h \
     helpwindow.h \
     prefswindow.h \
     ui_prefswindow.h \
-    ui_helpwindow.h
+    ui_helpwindow.h \
+    ../build-WatchIt-Desktop-Debug/ui_prefswindow.h
 
 DISTFILES += \
     ListWidget.css \

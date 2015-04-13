@@ -36,30 +36,20 @@
     <string>Сохранить</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>90</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Отмена</string>
-   </property>
-  </widget>
   <widget class="QCheckBox" name="checkBox">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>93</y>
-     <width>131</width>
+     <width>281</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
     <string>Поверх всех окон</string>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QLabel" name="label">

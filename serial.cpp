@@ -57,7 +57,7 @@ void Serial::updateSeasons() {
     QUrl serial(url);
     QString hostname(serial.host());
 
-    if (hostname != "adultmult.tv" && hostname != "adultmult.ru" && hostname != "zfilm-hd.com") {
+    if (hostname != "adultmult.tv" && hostname != "adultmult.ru" && hostname != "zfilm-hd.com" && hostname != "zhd.life") {
         QMessageBox::information(0, "Ошибка", "Клиент поддерживает только сайт adultmult.tv и zfilm-hd.com!", QMessageBox::Ok);
         return;
     }
@@ -69,11 +69,11 @@ void Serial::updateSeasons() {
             Serial serial;
             serial.url = reply->url().toString();
 
-            if (hostname == "zfilm-hd.com") {
+            if (hostname == "zfilm-hd.com" || hostname == "zhd.life") {
                 QString data = reply->readAll();
 
                 if (data.indexOf("обнаружена ошибка") != -1) {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден (обнаружена ошибка).", QMessageBox::Ok);
+                    QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (обнаружена ошибка).", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }
@@ -81,7 +81,7 @@ void Serial::updateSeasons() {
                 QRegExp name("<span id=\"dle-speedbar\">(.+)</div>");
                 name.setMinimal(true);
                 if (name.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден (проверьте ссылку).", QMessageBox::Ok);
+                    QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (не нашел название).", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }

@@ -57,8 +57,8 @@ void Serial::updateSeasons() {
     QUrl serial(url);
     QString hostname(serial.host());
 
-    if (hostname != "adultmult.tv" && hostname != "adultmult.ru" && hostname != "zfilm-hd.com" && hostname != "zhd.life") {
-        QMessageBox::information(0, "Ошибка", "Клиент поддерживает только сайт adultmult.tv и zfilm-hd.com!", QMessageBox::Ok);
+    if (hostname != "adultmult.tv" && hostname != "adultmult.ru" && hostname != "zfilm-hd.com" && hostname != "zhd.life" && hostname != "zfilm-hd.net") {
+        QMessageBox::information(0, "Ошибка", "Клиент поддерживает только сайт zfilm-hd.com!", QMessageBox::Ok);
         return;
     }
 
@@ -69,107 +69,91 @@ void Serial::updateSeasons() {
             Serial serial;
             serial.url = reply->url().toString();
 
-            if (hostname == "zfilm-hd.com" || hostname == "zhd.life") {
-                QString data = reply->readAll();
+            QString data = reply->readAll();
 
-                if (data.indexOf("обнаружена ошибка") != -1) {
-                    QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (обнаружена ошибка).", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
+            if (data.indexOf("обнаружена ошибка") != -1) {
+                QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (обнаружена ошибка).", QMessageBox::Ok);
+                isUpdated = true;
+                return;
+            }
 
-                QRegExp name("<span id=\"dle-speedbar\">(.+)</div>");
-                name.setMinimal(true);
-                if (name.indexIn(data) == -1)  {
-                    QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (не нашел название).", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
+            QRegExp name("<span id=\"dle-speedbar\">(.+)</div>");
+            name.setMinimal(true);
+            if (name.indexIn(data) == -1)  {
+                QMessageBox::information(qApp->activeModalWidget(), "Ошибка", "Сериал не найден (не нашел название).", QMessageBox::Ok);
+                isUpdated = true;
+                return;
+            }
 
-                serial.name = name.cap(1).split("&raquo;").last().trimmed().split('<')[0].trimmed();
+            serial.name = name.cap(1).split("&raquo;").last().trimmed().split('<')[0].trimmed();
 
-                QRegExp iframe("<iframe src=\"http://(moonwalk.cc|serpens.nl|helpcdn.nl)/(.+)/iframe");
-                iframe.setMinimal(true);
-                if (iframe.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден (отсутствует плеер).", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
-                serial.iframeUrl = iframe.cap(0).split('"')[1];
-                auto *seasonManager = new QNetworkAccessManager();
-                QUrl frame(serial.iframeUrl);
-                QNetworkRequest frameRequest(frame);
-                auto *freply = seasonManager->get(frameRequest);
+            QFile f("html.html");
+            f.open(QIODevice::ReadWrite);
+            QDataStream ds(&f);
+            ds << data;
+            f.close();
 
-                QEventLoop loop;
-                QObject::connect(freply, SIGNAL(finished()), &loop, SLOT(quit()));
-                loop.exec();
+            QRegExp iframeScript("showFilm\\('(.+)'\\)");
+            iframeScript.setMinimal(true);
+            if (iframeScript.indexIn(data) == -1)  {
+                QMessageBox::information(0, "Ошибка", "Сериал не найден (отсутствует плеер zfilm-hd).", QMessageBox::Ok);
+                isUpdated = true;
+                return;
+            }
+            QString iframeSource = QByteArray::fromBase64(iframeScript.cap(0).toUtf8());
 
-                if (freply->error() == QNetworkReply::NoError) {
-                    QString frameData = freply->readAll();
-                    QRegExp seasons("<select id=\"season\" name=\"season\"(.+)</select>");
-                    seasons.setMinimal(true);
-                    if (seasons.indexIn(frameData) == -1)  {
-                        QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона!", QMessageBox::Ok);
-                        isUpdated = true;
-                        return;
-                    }
+            QRegExp iframe("<iframe src=\"http://(.+)/(.+)/iframe");
+            iframe.setMinimal(true);
+            if (iframe.indexIn(iframeSource) == -1)  {
+                QMessageBox::information(0, "Ошибка", "Сериал не найден (не могу найти плеер).", QMessageBox::Ok);
+                isUpdated = true;
+                return;
+            }
+            serial.iframeUrl = iframe.cap(0).split('"')[1];
 
-                    int seasonCount = seasons.cap(1).split("option").size() / 2;
-                    for (int i = 0; i < seasonCount; i++) {
-                        Season season;
-                        season.url = serial.iframeUrl + "?season=" + QString::number(i + 1);
-                        if (seasonList.size() >= i + 1 && seasonList[i].url == season.url)
-                            serial.seasonList.append(seasonList[i]);
-                        else
-                            serial.seasonList.append(season);
-                    }
+            auto *seasonManager = new QNetworkAccessManager();
+            QUrl frame(serial.iframeUrl);
+            QNetworkRequest frameRequest(frame);
+            auto *freply = seasonManager->get(frameRequest);
 
-                    isUpdated = true;
-                } else {
-                    QMessageBox::information(0, "Ошибка", "Проблема с интернетом. Повторите позже.", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
-            } else {
-                QString data = codec->toUnicode(reply->readAll());
+            QEventLoop loop;
+            QObject::connect(freply, SIGNAL(finished()), &loop, SLOT(quit()));
+            loop.exec();
 
-                if (data.indexOf("Ошибка 404") != -1) {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
-
-                QRegExp name("<span class=\"(name|стиль1)\">((.|[\r\n])*)</span>");
-                name.setMinimal(true);
-                if (name.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
-                    isUpdated = true;
-                    return;
-                }
-                serial.name = (name.cap(0).replace("стиль1", "") == name.cap(0) ? name.cap(0).split("<br>")[1].trimmed() : name.cap(0).split(">")[1].split("<")[0]);
-
-                QRegExp seasons("<a href=\"(.+)\" (title=\"Смотреть .+ сезон.*\"|class=\"стиль98\")>");
+            if (freply->error() == QNetworkReply::NoError) {
+                QString frameData = freply->readAll();
+                QRegExp seasons("<select name=\"season\" id=\"season\"(.+)</select>");
                 seasons.setMinimal(true);
-                if (seasons.indexIn(data) == -1)  {
-                    QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона", QMessageBox::Ok);
+                if (seasons.indexIn(frameData) == -1)  {
+                    QMessageBox::information(0, "Ошибка", "Не найдено ни одного сезона!", QMessageBox::Ok);
                     isUpdated = true;
                     return;
                 }
-                int pos = 0;
-                int i = 0;
-                while ((pos = seasons.indexIn(data, pos)) != -1) {
+
+                QStringList seasonsList = seasons.cap(1).split("</option>");
+                int seasonCount = seasonsList.size() - 1;
+                for (int i = 0; i < seasonCount; i++) {
                     Season season;
-                    season.url = "http://adultmult.tv/" + serial.url.split('/')[3] + "/" + seasons.capturedTexts()[1].split('"').last();
-                    season.prefix = serial.url.split('/')[3];
+
+                    QString seasonNameData = seasonsList[i];
+                    QRegExp seasonIdRe(".*([0-9]+)");
+                    seasonIdRe.indexIn(seasonNameData);
+                    int seasonId = seasonIdRe.cap(1).toInt();
+
+                    season.url = serial.iframeUrl + "?season=" + QString::number(seasonId);
                     if (seasonList.size() >= i + 1 && seasonList[i].url == season.url)
                         serial.seasonList.append(seasonList[i]);
                     else
                         serial.seasonList.append(season);
-                    pos += seasons.matchedLength();
-                    i++;
                 }
+
+                isUpdated = true;
+            } else {
+                QMessageBox::information(0, "Ошибка", "Проблема с интернетом. Повторите позже.", QMessageBox::Ok);
+                isUpdated = true;
+                return;
             }
+
             this->name = serial.name;
             this->seasonList = serial.seasonList;
         } else {
@@ -217,71 +201,39 @@ void Season::updateEpisodes() {
     loop.exec();
 
     QString hostname = seasonUrl.host();
-    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" || hostname == "helpcdn.nl") {
-        QString episodeData = seasonReply->readAll();
-        if (episodeData.indexOf("обнаружена ошибка") != -1) {
-            QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
-            isUpdated = true;
-            return;
-        }
-
-        Season season;
-        QRegExp episodes("<select id=\"episode\" name=\"episode\"(.+)</select>");
-        episodes.setMinimal(true);
-        if (episodes.indexIn(episodeData) == -1)  {
-            QMessageBox::information(0, "Ошибка", "Не найдено ни одного эпизода!", QMessageBox::Ok);
-            isUpdated = true;
-            return;
-        }
-
-        int episodeCount = episodes.cap(1).split("option").size() / 2;
-        for (int i = 0; i < episodeCount; i++) {
-            Episode episode;
-            episode.link = url + "&episode=" + QString::number(i + 1);
-            episode.flashPlayer = episode.link;
-            episode.watched = false;
-            episode.name = "";
-
-            if (episodeList.size() >= i + 1) {
-                episode.watched = episodeList[i].watched;
-            }
-
-            season.episodeList.append(episode);
-        }
-
-        episodeList = season.episodeList;
+    QString episodeData = seasonReply->readAll();
+    if (episodeData.indexOf("обнаружена ошибка") != -1) {
+        QMessageBox::information(0, "Ошибка", "Сериал не найден", QMessageBox::Ok);
         isUpdated = true;
-    } else {
-        QString episodeData = codec->toUnicode(seasonReply->readAll());
-        if (episodeData.indexOf("Ошибка 404") != -1)  {
-            QMessageBox::information(0, "Ошибка", "Ошибка сезона: 404 (" + url + ").", QMessageBox::Ok);
-            return;
-        }
-
-        prefix = url.split('/')[3];
-
-        Season season;
-        QRegExp episodes("<a href=\"([a-zA-Z0-9_-.]+)\"><span class=\"(episode|стиль33|стиль41 стиль139 стиль138|стиль44 стиль137 стиль138 стиль139)\">(.+)</span>");
-        episodes.setMinimal(true);
-        int ePos = 0;
-        int i = 0;
-        while ((ePos = episodes.indexIn(episodeData, ePos)) != -1) {
-            Episode episode;
-            episode.name = episodes.cap(0).split(':')[1].split('<')[0].trimmed();
-            episode.link = "http://adultmult.tv/" + prefix + "/" + episodes.cap(1);
-            episode.watched = false;
-
-            if (episodeList.size() >= i + 1) {
-                episode.watched = episodeList[i].watched;
-            }
-
-            season.episodeList.append(episode);
-            ePos += episodes.matchedLength();
-            i++;
-        }
-        episodeList = season.episodeList;
-        isUpdated = true;
+        return;
     }
+
+    Season season;
+    QRegExp episodes("<select name=\"episode\" id=\"episode\"(.+)</select>");
+    episodes.setMinimal(true);
+    if (episodes.indexIn(episodeData) == -1)  {
+        QMessageBox::information(0, "Ошибка", "Не найдено ни одного эпизода!", QMessageBox::Ok);
+        isUpdated = true;
+        return;
+    }
+
+    int episodeCount = episodes.cap(1).split("option").size() / 2;
+    for (int i = 0; i < episodeCount; i++) {
+        Episode episode;
+        episode.link = url + "&episode=" + QString::number(i + 1);
+        episode.flashPlayer = episode.link;
+        episode.watched = false;
+        episode.name = "";
+
+        if (episodeList.size() >= i + 1) {
+            episode.watched = episodeList[i].watched;
+        }
+
+        season.episodeList.append(episode);
+    }
+
+    episodeList = season.episodeList;
+    isUpdated = true;
 }
 
 void Season::waitForUpdated() {
@@ -312,69 +264,8 @@ void Episode::updateSources() {
     QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
     auto *manager = new QNetworkAccessManager();
     QUrl url(link);
-
-    QString hostname = url.host();
-    if (hostname == "moonwalk.cc" || hostname == "serpens.nl" || hostname == "helpcdn.nl") {
-
-        //flashPlayer = link;
-        isUpdated = true;
-    } else {
-        QNetworkRequest request(url);
-        QNetworkReply *reply = manager->get(request);
-
-        QEventLoop loop;
-        QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-        QString data = codec->toUnicode(reply->readAll());
-        if (data.indexOf("Ошибка 404") != -1)  {
-            QMessageBox::information(0, "Ошибка", "Ошибка серии.", QMessageBox::Ok);
-            return;
-        }
-
-        Episode episode;
-        QRegExp video("<iframe src=\"(.+)vk.com/(.+)\"");
-        video.setMinimal(true);
-        video.indexIn(data);
-
-        QString frame = "http://vk.com/" + video.cap(2);
-
-
-        auto *manager2 = new QNetworkAccessManager();
-        QUrl url2(frame);
-        QNetworkRequest request2(url2);
-        QNetworkReply *reply2 = manager2->get(request2);
-
-        QEventLoop loop2;
-        QObject::connect(reply2, SIGNAL(finished()), &loop2, SLOT(quit()));
-        loop2.exec();
-
-        data = reply2->readAll();
-
-        QRegExp url240rx("\"url240\":\"(.+)\"");
-        QRegExp url360rx("\"url360\":\"(.+)\"");
-        QRegExp url480rx("\"url480\":\"(.+)\"");
-        QRegExp url720rx("\"url720\":\"(.+)\"");
-
-        url240rx.setMinimal(true);
-        url360rx.setMinimal(true);
-        url480rx.setMinimal(true);
-        url720rx.setMinimal(true);
-
-        url240rx.indexIn(data);
-        url360rx.indexIn(data);
-        url480rx.indexIn(data);
-        url720rx.indexIn(data);
-
-        url240 = url240rx.cap(1).replace("\\", "");
-        url360 = url360rx.cap(1).replace("\\", "");
-        url480 = url480rx.cap(1).replace("\\", "");
-        url720 = url720rx.cap(1).replace("\\", "");
-
-        flashPlayer = frame;
-
-        isUpdated = true;
-    }
+    isUpdated = true;
+    //todo
 }
 
 void Episode::waitForUpdated() {

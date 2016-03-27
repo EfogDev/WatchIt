@@ -2,6 +2,8 @@
 #ifndef CONST
 #define CONST
 
+#define VERSION "1.13"
+
 #define WINDIR   QString(QDir::homePath() + "\\.adultmult\\")
 #define LINUXDIR QString(QDir::homePath() + "/.adultmult/")
 

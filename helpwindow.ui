@@ -10,13 +10,13 @@
     <x>0</x>
     <y>0</y>
     <width>383</width>
-    <height>300</height>
+    <height>226</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>383</width>
-    <height>300</height>
+    <height>226</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -32,7 +32,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>260</y>
+     <y>190</y>
      <width>101</width>
      <height>32</height>
     </rect>
@@ -61,27 +61,27 @@
     </font>
    </property>
    <property name="text">
-    <string>WatchIt 1.02</string>
+    <string>WatchIt 1.13</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>80</y>
+     <y>60</y>
      <width>311</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Клиент для просмотра мультов и сериалов&lt;br/&gt;с известных сайтов AdultMult.tv и ZFilm-HD.com.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Клиент для просмотра сериалов с сайта zfilm-hd.net.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>270</y>
+     <x>20</x>
+     <y>200</y>
      <width>161</width>
      <height>16</height>
     </rect>
@@ -94,7 +94,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>130</y>
+     <y>110</y>
      <width>291</width>
      <height>16</height>
     </rect>
@@ -107,84 +107,13 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>150</y>
+     <y>130</y>
      <width>331</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
     <string>Критика, предложения и пожелания принимаются.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>180</y>
-     <width>151</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>А благодарности сюда:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_7">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>200</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>WebMoney -</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>220</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Яндекс.Деньги -</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="geometry">
-    <rect>
-     <x>139</x>
-     <y>200</y>
-     <width>101</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>R269820121654</string>
-   </property>
-   <property name="textInteractionFlags">
-    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_10">
-   <property name="geometry">
-    <rect>
-     <x>162</x>
-     <y>220</y>
-     <width>131</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>410012028680152</string>
-   </property>
-   <property name="textInteractionFlags">
-    <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
    </property>
   </widget>
  </widget>

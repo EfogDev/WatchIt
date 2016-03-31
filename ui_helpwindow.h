@@ -74,7 +74,7 @@ public:
     void retranslateUi(QDialog *Dialog)
     {
         Dialog->setWindowTitle(QApplication::translate("Dialog", "\320\236 \320\277\321\200\320\276\320\263\321\200\320\260\320\274\320\274\320\265", 0));
-        label->setText(QApplication::translate("Dialog", "WatchIt 1.02", 0));
+        label->setText(QApplication::translate("Dialog", "WatchIt 1.13", 0));
         label_2->setText(QApplication::translate("Dialog", "<html><head/><body><p>\320\232\320\273\320\270\320\265\320\275\321\202 \320\264\320\273\321\217 \320\277\321\200\320\276\321\201\320\274\320\276\321\202\321\200\320\260 \321\201\320\265\321\200\320\270\320\260\320\273\320\276\320\262 \321\201 \321\201\320\260\320\271\321\202\320\260 zfilm-hd.net.</p></body></html>", 0));
         label_3->setText(QApplication::translate("Dialog", "\302\251 \320\220\321\200\321\202\321\221\320\274 \320\241\321\203\320\277\321\200\321\203\320\275 (Efog)", 0));
         label_4->setText(QApplication::translate("Dialog", "\320\241\320\262\321\217\320\267\321\214: efog@yandex.ru", 0));
